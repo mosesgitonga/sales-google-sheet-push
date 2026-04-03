@@ -1,30 +1,50 @@
 """
 sheets/services.py
 ==================
-All Google Sheets interaction lives here.
+Google Sheets interaction.
 
-Sheet layout (horizontal sections):
-  - Each section occupies SECTION_WIDTH columns (9 data cols).
-  - Sections are separated by 1 blank column.
-  - So section offsets (0-indexed col): 0, 10, 20, 30, ...
-  - Row 1 (index 0): page name written in section's first column
-  - Row 2 (index 1): headers
-  - Row 3+ (index 2+): data rows
+Layout (horizontal sections):
+  - Each section = 9 data columns + 1 gap column = 10 columns per section
+  - Section start columns (0-indexed): 0, 10, 20, 30, ...
+  - Row 1 : page name
+  - Row 2 : headers
+  - Row 3 : TOTAL COMMISSION and TOTAL NET formulas
+  - Row 4+: data rows
 
-Headers (in order):
-  DATE | USERNAME | FORM OF PAYMENT | GROSS PRICE | NET PRICE | COMMISSION 20% | NOTES | TOTAL COMMISSION | TOTAL NET
+Column order per section:
+  0: DATE  1: USERNAME  2: FORM OF PAYMENT  3: GROSS PRICE  4: NET PRICE
+  5: COMMISSION 25%  6: NOTES  7: TOTAL COMMISSION  8: TOTAL NET
+
+Row placement rules:
+  1. Find section whose row-1 matches page name.
+     - Scan data rows (row 4+). If a row has NOTES = page name but
+       DATE + USERNAME empty -> REPLACE it.
+     - No empty rows left -> write to next empty row after last filled row.
+  2. No matching section -> find section with empty data rows -> claim it.
+  3. No space -> skip 3 rows after last filled content, write new block.
+
+Key: NO insertDimension calls. We only write to specific column ranges
+     so other sections are never affected.
 """
 
 from googleapiclient.discovery import build
-from google.oauth2.credentials import Credentials
-
 from apps.accounts.services import get_valid_credentials
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
-SECTION_WIDTH = 9          # number of data columns per section
-SECTION_GAP   = 1          # blank columns between sections
-SECTION_STEP  = SECTION_WIDTH + SECTION_GAP   # 10
+SECTION_WIDTH  = 9
+SECTION_GAP    = 1
+SECTION_STEP   = SECTION_WIDTH + SECTION_GAP   # 10
+
+COL_DATE       = 0
+COL_USERNAME   = 1
+COL_PAYMENT    = 2
+COL_GROSS      = 3
+COL_NET        = 4
+COL_COMMISSION = 5
+COL_NOTES      = 6
+COL_TOTAL_COMM = 7
+COL_TOTAL_NET  = 8
 
 HEADERS = [
     'DATE', 'USERNAME', 'FORM OF PAYMENT',
@@ -32,52 +52,62 @@ HEADERS = [
     'NOTES', 'TOTAL COMMISSION', 'TOTAL NET',
 ]
 
-ROW_PAGE_NAME = 1   # 1-indexed: row where page name is written
-ROW_HEADERS   = 2   # 1-indexed: row where headers are written
-ROW_DATA_START = 3  # 1-indexed: first data row
+ROW_PAGE_NAME  = 1   # 1-indexed
+ROW_HEADERS    = 2
+ROW_TOTALS     = 3   # totals live here
+ROW_DATA_START = 4   # data starts here
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Column helpers ────────────────────────────────────────────────────────────
 
-def col_index_to_letter(idx: int) -> str:
-    """Convert 0-based column index to A1 notation letter(s). e.g. 0→A, 25→Z, 26→AA."""
+def col_letter(idx: int) -> str:
+    """0-based column index to A1 letter. 0->A, 25->Z, 26->AA."""
     letters = ''
     idx += 1
     while idx:
-        idx, remainder = divmod(idx - 1, 26)
-        letters = chr(65 + remainder) + letters
+        idx, rem = divmod(idx - 1, 26)
+        letters = chr(65 + rem) + letters
     return letters
 
 
-def section_start_col(section_index: int) -> int:
-    """Return the 0-based column index of a section's first column."""
-    return section_index * SECTION_STEP
+def sec_start(sec: int) -> int:
+    return sec * SECTION_STEP
 
 
-def section_range(section_index: int, start_row: int, end_row: int) -> str:
-    """Return A1 range string for a full section between two rows (1-indexed)."""
-    start_col = section_start_col(section_index)
-    end_col   = start_col + SECTION_WIDTH - 1
-    return f'{col_index_to_letter(start_col)}{start_row}:{col_index_to_letter(end_col)}{end_row}'
+# ── API builders ──────────────────────────────────────────────────────────────
+
+def get_sheets_api(user):
+    creds = get_valid_credentials(user)
+    return build('sheets', 'v4', credentials=creds, cache_discovery=False).spreadsheets()
 
 
-def build_sheets_service(user):
-    creds   = get_valid_credentials(user)
-    service = build('sheets', 'v4', credentials=creds, cache_discovery=False)
-    return service.spreadsheets()
+def get_drive_api(user):
+    creds = get_valid_credentials(user)
+    return build('drive', 'v3', credentials=creds, cache_discovery=False)
 
 
-def build_drive_service(user):
-    creds   = get_valid_credentials(user)
-    service = build('drive', 'v3', credentials=creds, cache_discovery=False)
-    return service
+# ── Grid limits ───────────────────────────────────────────────────────────────
+
+def get_grid_limits(user, spreadsheet_id: str, sheet_id: int) -> dict:
+    api  = get_sheets_api(user)
+    meta = api.get(
+        spreadsheetId=spreadsheet_id,
+        fields='sheets(properties(sheetId,gridProperties))'
+    ).execute()
+    for s in meta.get('sheets', []):
+        if s['properties']['sheetId'] == sheet_id:
+            gp = s['properties']['gridProperties']
+            return {
+                'rows': gp.get('rowCount', 1000),
+                'cols': gp.get('columnCount', 26),
+            }
+    return {'rows': 1000, 'cols': 26}
 
 
-# ── Drive: list spreadsheets ──────────────────────────────────────────────────
+# ── Drive ─────────────────────────────────────────────────────────────────────
 
 def list_spreadsheets(user) -> list[dict]:
-    """Return a list of the user's Google Sheets files."""
-    drive = build_drive_service(user)
+    drive  = get_drive_api(user)
     result = drive.files().list(
         q="mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
         fields='files(id,name)',
@@ -87,327 +117,347 @@ def list_spreadsheets(user) -> list[dict]:
     return result.get('files', [])
 
 
-# ── Sheets: list tabs ─────────────────────────────────────────────────────────
-
 def list_tabs(user, spreadsheet_id: str) -> list[dict]:
-    """Return all sheet tabs in a spreadsheet as [{id, title}]."""
-    sheets = build_sheets_service(user)
-    meta   = sheets.get(spreadsheetId=spreadsheet_id, fields='sheets(properties)').execute()
+    api  = get_sheets_api(user)
+    meta = api.get(spreadsheetId=spreadsheet_id, fields='sheets(properties)').execute()
     return [
         {'id': s['properties']['sheetId'], 'title': s['properties']['title']}
         for s in meta.get('sheets', [])
     ]
 
 
-# ── Sheet state: read all sections ────────────────────────────────────────────
+# ── Safe 2-D value reader ─────────────────────────────────────────────────────
 
-def read_sheet_state(user, spreadsheet_id: str, sheet_title: str) -> list[dict]:
-    """
-    Read the sheet and return a list of section descriptors:
-    [
-      {
-        'section_index': 0,
-        'page_name': 'heather free',   # or None if empty
-        'has_headers': True,
-        'data_rows': 3,                # number of filled data rows
-        'last_data_row': 5,            # 1-indexed sheet row of last data row
-      },
-      ...
-    ]
-    We read up to MAX_SECTIONS sections.
-    """
-    MAX_SECTIONS = 20
-    sheets = build_sheets_service(user)
-
-    # Read a large range to cover all sections
-    end_col   = col_index_to_letter(MAX_SECTIONS * SECTION_STEP)
-    range_str = f"'{sheet_title}'!A1:{end_col}1000"
-
-    result = sheets.values().get(
+def read_all_values(api, spreadsheet_id: str, sheet_title: str,
+                    max_col_idx: int, max_row: int = 2000) -> list[list]:
+    end_col   = col_letter(max_col_idx)
+    range_str = f"'{sheet_title}'!A1:{end_col}{max_row}"
+    result    = api.values().get(
         spreadsheetId=spreadsheet_id,
         range=range_str,
         valueRenderOption='UNFORMATTED_VALUE',
     ).execute()
+    raw   = result.get('values', [])
+    width = max_col_idx + 1
+    return [row + [''] * (width - len(row)) for row in raw]
 
-    all_values = result.get('values', [])
 
-    # Pad rows to consistent length
-    max_col = MAX_SECTIONS * SECTION_STEP + SECTION_WIDTH
-    padded  = []
-    for row in all_values:
-        padded.append(row + [''] * (max_col - len(row)))
+def cell(values: list[list], row_idx: int, col_idx: int) -> str:
+    """Safe 0-indexed access, always returns str."""
+    if row_idx >= len(values):
+        return ''
+    row = values[row_idx]
+    return str(row[col_idx]).strip() if col_idx < len(row) else ''
 
-    sections = []
-    for sec_idx in range(MAX_SECTIONS):
-        start_col = section_start_col(sec_idx)
 
-        # Row 1 (index 0): page name
-        page_name = ''
-        if padded:
-            page_name = str(padded[0][start_col]).strip() if len(padded[0]) > start_col else ''
+# ── Read sheet state ──────────────────────────────────────────────────────────
 
-        # Row 2 (index 1): headers
-        has_headers = False
-        if len(padded) > 1:
-            header_val = str(padded[1][start_col]).strip().upper() if len(padded[1]) > start_col else ''
-            has_headers = header_val == 'DATE'
+def read_sheet_state(user, spreadsheet_id: str, sheet_title: str,
+                     sheet_id: int = None) -> list[dict]:
+    """
+    Return list of section descriptors.
 
-        # Count filled data rows from row 3 (index 2) onward
-        data_rows     = 0
-        last_data_row = ROW_HEADERS  # default: last row = header row
+    Each descriptor:
+    {
+      'section_index':   int,
+      'page_name':       str,
+      'has_headers':     bool,
+      'last_filled_row': int,   # 1-indexed; ROW_TOTALS if no data yet
+      'data_rows': [
+        {
+          'sheet_row': int,   # 1-indexed, starts at ROW_DATA_START (4)
+          'date':      str,
+          'username':  str,
+          'notes':     str,
+          'is_empty':  bool,  # True when date AND username both blank
+        },
+        ...
+      ],
+    }
+    """
+    api = get_sheets_api(user)
 
-        for row_idx in range(2, len(padded)):  # index 2 = row 3
-            date_val = str(padded[row_idx][start_col]).strip() if len(padded[row_idx]) > start_col else ''
-            user_val = str(padded[row_idx][start_col + 1]).strip() if len(padded[row_idx]) > start_col + 1 else ''
-            if date_val or user_val:
-                data_rows    += 1
-                last_data_row = row_idx + 1  # convert to 1-indexed
+    if sheet_id is not None:
+        limits   = get_grid_limits(user, spreadsheet_id, sheet_id)
+        max_secs = max(1, limits['cols'] // SECTION_STEP)
+    else:
+        max_secs = 10
+
+    max_col_idx = max_secs * SECTION_STEP + SECTION_WIDTH - 1
+    values      = read_all_values(api, spreadsheet_id, sheet_title, max_col_idx)
+
+    sections          = []
+    consecutive_empty = 0
+
+    for sec_idx in range(max_secs):
+        sc = sec_start(sec_idx)
+
+        page_name   = cell(values, 0, sc)                   # row 1
+        has_headers = cell(values, 1, sc).upper() == 'DATE' # row 2
+
+        # Data rows start at row index 3 (sheet row 4, skipping totals row)
+        data_rows        = []
+        last_filled_row  = ROW_TOTALS   # default: no data yet
+        consecutive_none = 0
+
+        for row_idx in range(3, len(values)):   # row_idx 3 = sheet row 4
+            date_val  = cell(values, row_idx, sc + COL_DATE)
+            user_val  = cell(values, row_idx, sc + COL_USERNAME)
+            notes_val = cell(values, row_idx, sc + COL_NOTES)
+            is_empty  = not date_val and not user_val
+
+            data_rows.append({
+                'sheet_row': row_idx + 1,   # 1-indexed
+                'date':      date_val,
+                'username':  user_val,
+                'notes':     notes_val,
+                'is_empty':  is_empty,
+            })
+
+            if not is_empty:
+                last_filled_row  = row_idx + 1
+                consecutive_none = 0
             else:
-                # Stop at first empty row in this section
-                break
+                consecutive_none += 1
+                if consecutive_none >= 3:
+                    break
 
         sections.append({
-            'section_index': sec_idx,
-            'page_name':     page_name,
-            'has_headers':   has_headers,
-            'data_rows':     data_rows,
-            'last_data_row': last_data_row,
+            'section_index':   sec_idx,
+            'page_name':       page_name,
+            'has_headers':     has_headers,
+            'data_rows':       data_rows,
+            'last_filled_row': last_filled_row,
         })
 
-        # Stop scanning once we hit fully empty sections (2 consecutive empty)
-        if not page_name and not has_headers and sec_idx > 0:
-            prev = sections[sec_idx - 1]
-            if not prev['page_name'] and not prev['has_headers']:
-                break
+        sec_is_empty      = not page_name and not has_headers and last_filled_row == ROW_TOTALS
+        consecutive_empty = consecutive_empty + 1 if sec_is_empty else 0
+        if consecutive_empty >= 2:
+            break
 
     return sections
 
 
-# ── Find or allocate a section for a page ─────────────────────────────────────
-
-def find_section_for_page(sections: list[dict], page_name: str) -> dict | None:
-    """Return the section dict that owns this page name, or None."""
-    page_lower = page_name.strip().lower()
-    for sec in sections:
-        if sec['page_name'].strip().lower() == page_lower:
-            return sec
-    return None
-
-
-def find_empty_section(sections: list[dict]) -> dict | None:
-    """Return the first section with no page name and no headers."""
-    for sec in sections:
-        if not sec['page_name'] and not sec['has_headers']:
-            return sec
-    return None
-
-
-def next_overflow_target(sections: list[dict], page_name: str) -> dict:
-    """
-    All sections are filled with OTHER pages.
-    Find the section for this page if it exists (overflow allowed),
-    otherwise pick section 0 as the overflow target.
-    The caller handles the 3-row gap skip.
-    """
-    existing = find_section_for_page(sections, page_name)
-    if existing:
-        return existing
-    # Return first section for overflow (could be enhanced to rotate)
-    return sections[0]
-
-
 # ── Write helpers ─────────────────────────────────────────────────────────────
 
-def ensure_section_headers(sheets_api, spreadsheet_id: str, sheet_id: int,
-                            sheet_title: str, section_index: int, page_name: str):
-    """Write page name on row 1 and headers on row 2 for this section."""
-    start_col = section_start_col(section_index)
-
-    # Page name in row 1, col A of section
-    page_range = f"'{sheet_title}'!{col_index_to_letter(start_col)}{ROW_PAGE_NAME}"
-    sheets_api.values().update(
-        spreadsheetId=spreadsheet_id,
-        range=page_range,
-        valueInputOption='RAW',
-        body={'values': [[page_name]]},
-    ).execute()
-
-    # Headers in row 2
-    header_range = (
-        f"'{sheet_title}'!"
-        f"{col_index_to_letter(start_col)}{ROW_HEADERS}:"
-        f"{col_index_to_letter(start_col + SECTION_WIDTH - 1)}{ROW_HEADERS}"
-    )
-    sheets_api.values().update(
-        spreadsheetId=spreadsheet_id,
-        range=header_range,
-        valueInputOption='RAW',
-        body={'values': [HEADERS]},
-    ).execute()
-
-
-def insert_row_in_section(sheets_api, spreadsheet_id: str, sheet_id: int,
-                           insert_at_row: int):
-    """Insert a blank row at insert_at_row (1-indexed), shifting rows down."""
-    sheets_api.batchUpdate(
+def write_page_and_headers(api, spreadsheet_id: str, sheet_title: str,
+                            sec: int, page_name: str):
+    """Write page name on row 1 and headers on row 2."""
+    sc = sec_start(sec)
+    ec = sc + SECTION_WIDTH - 1
+    api.values().batchUpdate(
         spreadsheetId=spreadsheet_id,
         body={
-            'requests': [{
-                'insertDimension': {
-                    'range': {
-                        'sheetId':    sheet_id,
-                        'dimension':  'ROWS',
-                        'startIndex': insert_at_row - 1,   # 0-indexed
-                        'endIndex':   insert_at_row,
-                    },
-                    'inheritFromBefore': True,
-                }
-            }]
-        }
-    ).execute()
-
-
-def write_data_row(sheets_api, spreadsheet_id: str, sheet_title: str,
-                   section_index: int, row_number: int, row_data: list):
-    """Write a single data row at row_number (1-indexed) in this section."""
-    start_col  = section_start_col(section_index)
-    range_str  = (
-        f"'{sheet_title}'!"
-        f"{col_index_to_letter(start_col)}{row_number}:"
-        f"{col_index_to_letter(start_col + SECTION_WIDTH - 1)}{row_number}"
-    )
-    sheets_api.values().update(
-        spreadsheetId=spreadsheet_id,
-        range=range_str,
-        valueInputOption='USER_ENTERED',
-        body={'values': [row_data]},
-    ).execute()
-
-
-def update_section_totals(sheets_api, spreadsheet_id: str, sheet_title: str,
-                           section_index: int, sections_state: list[dict]):
-    """
-    Recalculate TOTAL COMMISSION and TOTAL NET for this section
-    by summing columns F (commission) and E (net) from row 3 downward,
-    and write them in the TOTAL COMMISSION and TOTAL NET cells.
-    We place running totals in col H and I of the section's row 2.
-    """
-    # Re-read the section to get current totals
-    sec       = next((s for s in sections_state if s['section_index'] == section_index), None)
-    if not sec or sec['last_data_row'] < ROW_DATA_START:
-        return
-
-    start_col  = section_start_col(section_index)
-    net_col    = col_index_to_letter(start_col + 4)   # E offset = NET PRICE
-    comm_col   = col_index_to_letter(start_col + 5)   # F offset = COMMISSION
-    tc_col     = col_index_to_letter(start_col + 7)   # H offset = TOTAL COMMISSION
-    tn_col     = col_index_to_letter(start_col + 8)   # I offset = TOTAL NET
-    last_row   = sec['last_data_row']
-
-    total_comm_formula = f'=SUM({comm_col}{ROW_DATA_START}:{comm_col}{last_row})'
-    total_net_formula  = f'=SUM({net_col}{ROW_DATA_START}:{net_col}{last_row})'
-
-    # Write totals into row 2 cols H, I of this section
-    tc_range = f"'{sheet_title}'!{tc_col}{ROW_HEADERS}"
-    tn_range = f"'{sheet_title}'!{tn_col}{ROW_HEADERS}"
-
-    sheets_api.values().batchUpdate(
-        spreadsheetId=spreadsheet_id,
-        body={
-            'valueInputOption': 'USER_ENTERED',
+            'valueInputOption': 'RAW',
             'data': [
-                {'range': tc_range, 'values': [[total_comm_formula]]},
-                {'range': tn_range, 'values': [[total_net_formula]]},
+                {
+                    'range':  f"'{sheet_title}'!{col_letter(sc)}{ROW_PAGE_NAME}",
+                    'values': [[page_name]],
+                },
+                {
+                    'range':  f"'{sheet_title}'!{col_letter(sc)}{ROW_HEADERS}:{col_letter(ec)}{ROW_HEADERS}",
+                    'values': [HEADERS],
+                },
             ]
         }
     ).execute()
 
 
-# ── Main entry: push rows ─────────────────────────────────────────────────────
+def write_page_name_only(api, spreadsheet_id: str, sheet_title: str,
+                          sec: int, page_name: str):
+    sc = sec_start(sec)
+    api.values().update(
+        spreadsheetId=spreadsheet_id,
+        range=f"'{sheet_title}'!{col_letter(sc)}{ROW_PAGE_NAME}",
+        valueInputOption='RAW',
+        body={'values': [[page_name]]},
+    ).execute()
 
-def push_rows(user, spreadsheet_id: str, sheet_id: int, sheet_title: str,
-              page_name: str, rows: list[dict]) -> dict:
+
+def write_data_row(api, spreadsheet_id: str, sheet_title: str,
+                   sec: int, sheet_row: int, values: list):
     """
-    Push a list of row dicts to the correct section for page_name.
-
-    row dict keys: date, username, payment, gross, net, commission, notes
-
-    Returns: { 'inserted': int, 'section_index': int, 'tab': str }
+    Write values into a specific row of a section's column range only.
+    This never touches other sections because we target exact columns.
     """
-    sheets_api = build_sheets_service(user)
-    sections   = read_sheet_state(user, spreadsheet_id, sheet_title)
+    sc = sec_start(sec)
+    ec = sc + SECTION_WIDTH - 1
+    api.values().update(
+        spreadsheetId=spreadsheet_id,
+        range=f"'{sheet_title}'!{col_letter(sc)}{sheet_row}:{col_letter(ec)}{sheet_row}",
+        valueInputOption='USER_ENTERED',
+        body={'values': [values]},
+    ).execute()
 
-    existing_sec = find_section_for_page(sections, page_name)
 
-    if existing_sec:
-        # Section found — append rows after last data row, inserting sheet rows
-        sec           = existing_sec
-        section_index = sec['section_index']
-        insert_row    = sec['last_data_row'] + 1
+def update_totals(api, spreadsheet_id: str, sheet_title: str,
+                  sec: int, last_data_row: int):
+    """
+    Write SUM formulas into ROW_TOTALS (row 3) for this section only.
+    Targets TOTAL COMMISSION (col H of section) and TOTAL NET (col I of section).
+    """
+    sc       = sec_start(sec)
+    net_col  = col_letter(sc + COL_NET)
+    comm_col = col_letter(sc + COL_COMMISSION)
+    tc_col   = col_letter(sc + COL_TOTAL_COMM)
+    tn_col   = col_letter(sc + COL_TOTAL_NET)
 
-        for row_data in rows:
-            # Insert a new row at insert_row to push existing content down
-            insert_row_in_section(sheets_api, spreadsheet_id, sheet_id, insert_row)
-            write_data_row(
-                sheets_api, spreadsheet_id, sheet_title,
-                section_index, insert_row,
-                _format_row(row_data, page_name)
-            )
-            insert_row += 1
+    api.values().batchUpdate(
+        spreadsheetId=spreadsheet_id,
+        body={
+            'valueInputOption': 'USER_ENTERED',
+            'data': [
+                {
+                    'range':  f"'{sheet_title}'!{tc_col}{ROW_TOTALS}",
+                    'values': [[f'=SUM({comm_col}{ROW_DATA_START}:{comm_col}{last_data_row})']],
+                },
+                {
+                    'range':  f"'{sheet_title}'!{tn_col}{ROW_TOTALS}",
+                    'values': [[f'=SUM({net_col}{ROW_DATA_START}:{net_col}{last_data_row})']],
+                },
+            ]
+        }
+    ).execute()
 
-    else:
-        # No existing section — find an empty one or overflow
-        empty_sec = find_empty_section(sections)
 
-        if empty_sec:
-            section_index = empty_sec['section_index']
-            insert_row    = ROW_DATA_START
-        else:
-            # All sections have OTHER pages — overflow back to a section
-            # We use the section with the most content (section 0) and skip 3 rows
-            overflow_sec  = sections[0]
-            section_index = overflow_sec['section_index']
-            insert_row    = overflow_sec['last_data_row'] + 4  # skip 3 blank rows
+def format_row(row: dict, page_name: str) -> list:
+    return [
+        row.get('date', ''),
+        row.get('username', ''),
+        row.get('payment', 'Message purchase'),
+        row.get('gross', ''),
+        row.get('net', ''),
+        row.get('commission', ''),
+        row.get('notes', page_name),
+        '',   # TOTAL COMMISSION col — left blank, formula is in row 3
+        '',   # TOTAL NET col — left blank, formula is in row 3
+    ]
 
-        # Write page name + headers
-        ensure_section_headers(
-            sheets_api, spreadsheet_id, sheet_id,
-            sheet_title, section_index, page_name
+
+# ── Placement within a known section ─────────────────────────────────────────
+
+def place_rows_in_section(api, spreadsheet_id: str, sheet_title: str,
+                           sec_desc: dict, page_name: str,
+                           incoming: list[dict]) -> int:
+    """
+    Write incoming rows into sec_desc. No row inserts — we only write
+    to specific column ranges so other sections are never shifted.
+
+    For each incoming row:
+      1. Find empty slot (date+username blank) whose NOTES matches
+         page_name or is empty -> overwrite it.
+      2. No empty slots left -> write to next row after last filled row.
+
+    Returns 1-indexed sheet row of the last written row.
+    """
+    sec          = sec_desc['section_index']
+    last_written = sec_desc['last_filled_row']
+    page_lower   = page_name.strip().lower()
+
+    empty_slots = [
+        r for r in sec_desc['data_rows']
+        if r['is_empty'] and (
+            r['notes'].strip().lower() == page_lower
+            or r['notes'] == ''
         )
+    ]
 
-        for row_data in rows:
-            insert_row_in_section(sheets_api, spreadsheet_id, sheet_id, insert_row)
-            write_data_row(
-                sheets_api, spreadsheet_id, sheet_title,
-                section_index, insert_row,
-                _format_row(row_data, page_name)
-            )
-            insert_row += 1
+    for row_data in incoming:
+        values = format_row(row_data, page_name)
 
-    # Refresh state and update totals
-    updated_sections = read_sheet_state(user, spreadsheet_id, sheet_title)
-    update_section_totals(
-        sheets_api, spreadsheet_id, sheet_title,
-        section_index, updated_sections 
+        if empty_slots:
+            slot = empty_slots.pop(0)
+            write_data_row(api, spreadsheet_id, sheet_title,
+                           sec, slot['sheet_row'], values)
+            last_written = max(last_written, slot['sheet_row'])
+        else:
+            # Write to the next row — no insert, just target the next empty row
+            next_row = last_written + 1
+            write_data_row(api, spreadsheet_id, sheet_title,
+                           sec, next_row, values)
+            last_written = next_row
+
+    return last_written
+
+
+# ── Main entry ────────────────────────────────────────────────────────────────
+
+def push_rows(user, spreadsheet_id: str, sheet_id: int,
+              sheet_title: str, page_name: str, rows: list[dict]) -> dict:
+    """
+    Push rows into the correct section. No full-row inserts ever.
+
+    1. Section whose row-1 matches page_name -> replace empty rows or append.
+    2. No match -> section with empty data rows -> claim and fill.
+    3. No space -> write after last content with 3-row gap.
+    """
+    api        = get_sheets_api(user)
+    sections   = read_sheet_state(user, spreadsheet_id, sheet_title, sheet_id)
+    page_lower = page_name.strip().lower()
+
+    # ── 1. Matching section ────────────────────────────────────────────────────
+    match = next(
+        (s for s in sections if s['page_name'].strip().lower() == page_lower),
+        None
     )
+    if match:
+        last_row = place_rows_in_section(
+            api, spreadsheet_id, sheet_title, match, page_name, rows
+        )
+        update_totals(api, spreadsheet_id, sheet_title,
+                      match['section_index'], last_row)
+        return {
+            'inserted':      len(rows),
+            'section_index': match['section_index'],
+            'tab':           sheet_title,
+        }
 
+    # ── 2. Empty section available ─────────────────────────────────────────────
+    empty_sec = next(
+        (s for s in sections
+         if not s['page_name']
+         and any(r['is_empty'] for r in s['data_rows'])),
+        None
+    )
+    if empty_sec:
+        sec_idx = empty_sec['section_index']
+        if not empty_sec['has_headers']:
+            write_page_and_headers(api, spreadsheet_id,
+                                   sheet_title, sec_idx, page_name)
+        else:
+            write_page_name_only(api, spreadsheet_id,
+                                 sheet_title, sec_idx, page_name)
+
+        last_row = place_rows_in_section(
+            api, spreadsheet_id, sheet_title, empty_sec, page_name, rows
+        )
+        update_totals(api, spreadsheet_id, sheet_title, sec_idx, last_row)
+        return {
+            'inserted':      len(rows),
+            'section_index': sec_idx,
+            'tab':           sheet_title,
+        }
+
+    # ── 3. Overflow ────────────────────────────────────────────────────────────
+    # All sections taken — write after section 0's last content with 3-row gap
+    base_sec  = sections[0]
+    sec_idx   = base_sec['section_index']
+    start_row = base_sec['last_filled_row'] + 4   # 3 gap rows + 1
+
+    write_page_and_headers(api, spreadsheet_id,
+                           sheet_title, sec_idx, page_name)
+
+    # Data starts 2 rows after start_row (row 1 = page name, row 2 = headers)
+    data_row = start_row + 2
+    for row_data in rows:
+        write_data_row(api, spreadsheet_id, sheet_title, sec_idx,
+                       data_row, format_row(row_data, page_name))
+        data_row += 1
+
+    last_row = data_row - 1
+    update_totals(api, spreadsheet_id, sheet_title, sec_idx, last_row)
     return {
         'inserted':      len(rows),
-        'section_index': section_index,
+        'section_index': sec_idx,
         'tab':           sheet_title,
     }
-
-
-def _format_row(row_data: dict, page_name: str) -> list:
-    """Convert a row dict into the ordered list matching HEADERS."""
-    return [
-        row_data.get('date', ''),
-        row_data.get('username', ''),
-        row_data.get('payment', 'Message purchase'),
-        row_data.get('gross', ''),
-        row_data.get('net', ''),
-        row_data.get('commission', ''),
-        row_data.get('notes', page_name),
-        '',   # TOTAL COMMISSION — filled by formula
-        '',   # TOTAL NET — filled by formula
-    ]

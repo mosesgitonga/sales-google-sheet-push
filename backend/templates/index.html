@@ -420,7 +420,7 @@ var STATE = {
   spreadsheetId:   localStorage.getItem('ss_id')   || null,
   spreadsheetName: localStorage.getItem('ss_name') || null,
   tabTitle:        localStorage.getItem('ss_tab')  || null,
-  tabId:           localStorage.getItem('ss_gid')  || null,
+  tabId: localStorage.getItem('ss_gid') ? parseInt(localStorage.getItem('ss_gid'), 10) || null : null,
   mode:            'sales',
   salesRows:       [],
   tipsRows:        [],
@@ -845,30 +845,52 @@ function renderTipsSummary() {
     '<div class="sc"><div class="big cp">$'+tc.toFixed(2)+'</div><div class="lbl">Total Commission</div></div>';
 }
 
-// ── Push ──────────────────────────────────────────────────────────────────────
 async function push(rows, pageName, btnId, msgId) {
-  if (!STATE.spreadsheetId||!STATE.tabTitle) { showMsg(msgId,'err','No sheet selected. Go to Sheet Setup.'); return; }
-  var btn=document.getElementById(btnId);
-  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Pushing...';
-  try {
-    var result = await api('/api/sheets/spreadsheets/'+STATE.spreadsheetId+'/push/', {
-      method:'POST',
-      body:{
-        sheet_id:    STATE.tabId,
-        sheet_title: STATE.tabTitle,
-        page_name:   pageName,
-        rows:        rows.map(function(r){ return {
-          date:r.date, username:r.username, payment:r.payment,
-          gross:r.gross.toFixed(2), net:r.net.toFixed(2), commission:r.commission.toFixed(2), notes:r.notes
-        };})
-      }
-    });
-    showMsg(msgId,'ok','✓ '+result.inserted+' row(s) pushed to section '+(result.section_index+1)+' of "'+result.tab+'".');
-  } catch(e) {
-    showMsg(msgId,'err',e.message);
+  if (!STATE.spreadsheetId || !STATE.tabTitle) {
+    showMsg(msgId, 'err', 'No sheet selected. Go to Sheet Setup.');
+    return;
   }
-  btn.disabled=false;
-  btn.innerHTML = btnId==='salesPushBtn' ? '📤 Push to Sheet' : '📤 Push Tips to Sheet';
+  if (!STATE.tabId) {
+    showMsg(msgId, 'err', 'No tab selected. Go to Sheet Setup and click a tab.');
+    return;
+  }
+
+  var btn = document.getElementById(btnId);
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spin"></span> Pushing...';
+
+  var payload = {
+    sheet_id:    STATE.tabId,
+    sheet_title: STATE.tabTitle,
+    page_name:   pageName,
+    rows: rows.map(function(r) {
+      return {
+        date:       r.date,
+        username:   r.username,
+        payment:    r.payment,
+        gross:      r.gross.toFixed(2),
+        net:        r.net.toFixed(2),
+        commission: r.commission.toFixed(2),
+        notes:      r.notes,
+      };
+    })
+  };
+
+  try {
+    var result = await api(
+      '/api/sheets/spreadsheets/' + STATE.spreadsheetId + '/push/',
+      { method: 'POST', body: payload }
+    );
+    showMsg(msgId, 'ok',
+      '✓ ' + result.inserted + ' row(s) pushed to section ' +
+      (result.section_index + 1) + ' of "' + result.tab + '".'
+    );
+  } catch(e) {
+    showMsg(msgId, 'err', e.message);
+  }
+
+  btn.disabled  = false;
+  btn.innerHTML = btnId === 'salesPushBtn' ? '📤 Push to Sheet' : '📤 Push Tips to Sheet';
 }
 
 function pushSales() {
