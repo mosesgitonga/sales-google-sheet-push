@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SalesSync</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0c0c13;--surface:#111120;--card:#13131f;--border:#1e1e2e;
+  --bg:#0c0c13;--card:#13131f;--border:#1e1e2e;
   --accent:#b967ff;--green:#3dffaa;--pink:#ff6b9d;--gold:#ffc850;
   --text:#e6e6f2;--muted:#52526a;
 }
@@ -19,12 +19,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* ── Layout ── */
 .app{display:flex;min-height:100vh;position:relative;z-index:1}
-.sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
-.main{flex:1;padding:32px 28px;overflow-y:auto}
-@media(max-width:700px){.app{flex-direction:column}.sidebar{width:100%;flex-direction:row;flex-wrap:wrap;padding:16px;border-right:none;border-bottom:1px solid var(--border)}}
+.sidebar{width:220px;background:#0e0e1a;border-right:1px solid var(--border);padding:24px 14px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.main{flex:1;padding:32px 28px;overflow-y:auto;max-width:960px}
+@media(max-width:700px){.app{flex-direction:column}.sidebar{width:100%;flex-direction:row;flex-wrap:wrap;padding:14px;border-right:none;border-bottom:1px solid var(--border)}}
 
 /* ── Sidebar ── */
-.brand{font-size:18px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(130deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding:0 8px;margin-bottom:16px}
+.brand{font-size:18px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(130deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding:0 8px;margin-bottom:20px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);transition:all .15s;border:none;background:none;width:100%;text-align:left}
 .nav-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
 .nav-item.active{background:rgba(185,103,255,.12);color:var(--accent)}
@@ -46,8 +46,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* ── Cards ── */
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:16px}
-.card-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
-.card-label.gold{color:var(--gold)}
+.clabel{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.clabel.gold{color:var(--gold)}
 
 /* ── Forms ── */
 label{display:block;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:6px;margin-top:14px}
@@ -66,10 +66,11 @@ textarea{min-height:180px;line-height:1.7}
 /* ── Buttons ── */
 .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
 .btn-primary{background:linear-gradient(135deg,var(--accent),#8020ee);color:#fff;box-shadow:0 4px 14px rgba(185,103,255,.3)}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(185,103,255,.42)}
+.btn-primary:hover{transform:translateY(-1px)}
 .btn-green{background:linear-gradient(135deg,var(--green),#00b87a);color:#08080f;font-weight:800}
 .btn-green:hover{transform:translateY(-1px)}
 .btn-gold{background:linear-gradient(135deg,var(--gold),#e6a800);color:#08080f;font-weight:800}
+.btn-gold:hover{transform:translateY(-1px)}
 .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted)}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
 .btn-danger{background:none;border:1px solid rgba(255,107,157,.3);color:var(--pink)}
@@ -94,15 +95,12 @@ td{padding:9px 13px;border-bottom:1px solid rgba(30,30,46,.8);white-space:nowrap
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(185,103,255,.03)}
 .cv{color:var(--accent)}.cg{color:var(--green)}.cp{color:var(--pink)}.cw{color:var(--gold)}
-
-/* ── Tags / Pills ── */
 .tag{background:rgba(185,103,255,.13);color:var(--accent);border-radius:5px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace}
-.tag-green{background:rgba(61,255,170,.1);color:var(--green);border-radius:5px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace}
 .tag-gold{background:rgba(255,200,80,.13);color:var(--gold);border-radius:5px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace}
 .skip-tag{background:rgba(255,107,157,.1);color:var(--pink);border-radius:5px;padding:2px 6px;font-size:10px;font-family:'DM Mono',monospace}
 .code-pill{background:rgba(61,255,170,.1);color:var(--green);border:1px solid rgba(61,255,170,.2);border-radius:5px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;display:inline-block;margin-top:5px}
 
-/* ── Summary strip ── */
+/* ── Summary ── */
 .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
 .sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 16px;text-align:center}
 .sc .big{font-size:20px;font-weight:800;font-family:'DM Mono',monospace}
@@ -110,23 +108,12 @@ tr:hover td{background:rgba(185,103,255,.03)}
 
 /* ── Pages list ── */
 .page-list{display:flex;flex-direction:column;gap:8px;margin-top:4px}
-.page-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 14px;transition:border-color .15s}
+.page-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 14px}
 .page-item:hover{border-color:rgba(185,103,255,.3)}
 .page-item-name{font-family:'DM Mono',monospace;font-size:13px}
-.page-item-actions{display:flex;gap:6px;align-items:center}
-
-/* ── Sheet selector ── */
-.sheet-selector{display:flex;flex-direction:column;gap:10px}
-.sheet-file{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px 16px;cursor:pointer;transition:all .15s}
-.sheet-file:hover,.sheet-file.selected{border-color:var(--accent);background:rgba(185,103,255,.05)}
-.sheet-file-name{font-family:'DM Mono',monospace;font-size:12px}
-.sheet-file-id{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
-.tab-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.tab-btn{padding:6px 14px;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--muted);transition:all .15s}
-.tab-btn:hover,.tab-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(185,103,255,.07)}
 
 /* ── Mode toggle ── */
-.mode-toggle{display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border);border-radius:10px;overflow:hidden;width:fit-content}
+.mode-toggle{display:flex;margin-bottom:24px;border:1px solid var(--border);border-radius:10px;overflow:hidden;width:fit-content}
 .mode-btn{padding:9px 22px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;border:none;background:none;color:var(--muted);transition:all .15s}
 .mode-btn.active-sales{background:linear-gradient(135deg,var(--accent),#8020ee);color:#fff}
 .mode-btn.active-tips{background:linear-gradient(135deg,var(--gold),#e6a800);color:#08080f}
@@ -135,7 +122,7 @@ tr:hover td{background:rgba(185,103,255,.03)}
 .spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;display:inline-block}
 @keyframes sp{to{transform:rotate(360deg)}}
 
-/* ── Details/skip ── */
+/* ── Skip details ── */
 details{margin-top:8px}
 details summary{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);cursor:pointer;list-style:none;user-select:none}
 details summary::-webkit-details-marker{display:none}
@@ -143,29 +130,21 @@ details summary::before{content:'▶ ';font-size:9px}
 details[open] summary::before{content:'▼ '}
 .skip-list{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:2;margin-top:6px}
 
-/* ── Login screen ── */
+/* ── Login ── */
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;position:relative;z-index:1}
 .login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:48px 40px;max-width:420px;width:90%;text-align:center}
 .login-logo{font-size:32px;font-weight:800;background:linear-gradient(130deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
 .login-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:36px}
-.btn-google{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:14px 20px;border-radius:10px;background:#fff;color:#1a1a2e;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;border:none;transition:all .15s;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:14px 20px;border-radius:10px;background:#fff;color:#1a1a2e;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;border:none;transition:all .15s;box-shadow:0 4px 20px rgba(0,0,0,.3);text-decoration:none}
 .btn-google:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(0,0,0,.4)}
 .btn-google svg{width:20px;height:20px;flex-shrink:0}
 .login-note{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:20px;line-height:1.6}
-
-/* ── Section state display ── */
-.section-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
-.section-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
-.section-card.has-page{border-color:rgba(185,103,255,.3)}
-.section-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
-.section-name{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;margin-bottom:3px}
-.section-rows{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
 </style>
 </head>
 <body>
 
-<!-- Login Screen -->
-<div id="loginScreen">
+<!-- Login -->
+<div id="loginScreen" style="display:none">
   <div class="login-box">
     <div class="login-logo">SalesSync</div>
     <div class="login-sub">Notification Tracker</div>
@@ -178,29 +157,21 @@ details[open] summary::before{content:'▼ '}
       </svg>
       Continue with Google
     </a>
-    <div class="login-note">
-      Requires access to Google Sheets &amp; Drive.<br>
-      Your data is never stored on our servers.
-    </div>
+    <div class="login-note">Your data is never stored on our servers.</div>
     <div id="loginError" style="margin-top:12px"></div>
   </div>
 </div>
 
-<!-- App Shell (hidden until auth) -->
+<!-- App -->
 <div id="appShell" style="display:none">
   <div class="app">
-
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="brand">SalesSync</div>
-      <button class="nav-item active" data-page="tracker" onclick="nav('tracker',this)">
+      <button class="nav-item active" onclick="nav('tracker',this)">
         <span class="icon">⚡</span> Tracker
       </button>
-      <button class="nav-item" data-page="pages" onclick="nav('pages',this)">
+      <button class="nav-item" onclick="nav('pages',this)">
         <span class="icon">📋</span> My Pages
-      </button>
-      <button class="nav-item" data-page="settings" onclick="nav('settings',this)">
-        <span class="icon">⚙</span> Sheet Setup
       </button>
       <div class="sidebar-footer">
         <div class="user-row">
@@ -214,32 +185,13 @@ details[open] summary::before{content:'▼ '}
       </div>
     </aside>
 
-    <!-- Main -->
     <main class="main">
 
-      <!-- ── Tracker Page ── -->
+      <!-- Tracker -->
       <div id="page-tracker" class="page active">
         <div class="page-title">Tracker</div>
-        <div class="page-sub">Parse &amp; push to Google Sheets</div>
+        <div class="page-sub">Parse notifications &amp; copy to sheets</div>
 
-        <!-- Sheet not selected warning -->
-        <div id="noSheetWarning" class="alert a-warn" style="display:none">
-          ⚠ No sheet selected. Go to <strong>Sheet Setup</strong> to pick your spreadsheet and tab.
-        </div>
-
-        <!-- Selected sheet info -->
-        <div id="selectedSheetInfo" style="display:none" class="card" style="margin-bottom:16px">
-          <div class="card-label">Active Sheet</div>
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-            <div>
-              <div style="font-weight:700;font-size:14px" id="infoSheetName"></div>
-              <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)" id="infoTabName"></div>
-            </div>
-            <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px" onclick="nav('settings',document.querySelector('[data-page=settings]'))">Change</button>
-          </div>
-        </div>
-
-        <!-- Mode toggle -->
         <div class="mode-toggle">
           <button class="mode-btn active-sales" id="modeSales" onclick="setMode('sales')">💬 Message Purchase</button>
           <button class="mode-btn" id="modeTips" onclick="setMode('tips')">💰 Tips</button>
@@ -247,7 +199,7 @@ details[open] summary::before{content:'▼ '}
 
         <!-- Sales form -->
         <div id="salesForm" class="card">
-          <div class="card-label">Parse Details</div>
+          <div class="clabel">Parse Details</div>
           <div class="g4">
             <div>
               <label>Page Name</label>
@@ -256,7 +208,7 @@ details[open] summary::before{content:'▼ '}
               </select>
             </div>
             <div>
-              <label>Sales Code <span style="color:var(--muted);font-size:9px">(e.g. 18)</span></label>
+              <label>Sales Code</label>
               <input id="salesCode" type="text" placeholder="e.g. 18" oninput="onCodeInput()" />
               <div id="codeParsed"></div>
             </div>
@@ -280,7 +232,7 @@ details[open] summary::before{content:'▼ '}
 
         <!-- Tips form -->
         <div id="tipsForm" class="card" style="display:none">
-          <div class="card-label gold">Parse Tips</div>
+          <div class="clabel gold">Parse Tips</div>
           <div class="g3">
             <div>
               <label>Page Name</label>
@@ -310,7 +262,7 @@ details[open] summary::before{content:'▼ '}
         <div id="salesResults" style="display:none">
           <div class="summary" id="salesSummary"></div>
           <div class="card">
-            <div class="card-label">Review &amp; Push</div>
+            <div class="clabel">Review &amp; Copy</div>
             <div style="font-weight:700;font-size:14px;margin-bottom:12px">
               <span id="salesBadge" class="tag"></span>
               <span id="salesFilterBadge" style="margin-left:8px"></span>
@@ -318,7 +270,7 @@ details[open] summary::before{content:'▼ '}
             <div class="tbl-wrap">
               <table>
                 <thead><tr>
-                  <th>Date</th><th>Username</th><th>Payment</th>
+                  <th>Date</th><th>Username</th><th>Form of Payment</th>
                   <th>Gross</th><th>Net</th><th>Commission</th><th>Notes</th>
                 </tr></thead>
                 <tbody id="salesTbody"></tbody>
@@ -326,10 +278,10 @@ details[open] summary::before{content:'▼ '}
             </div>
             <div id="salesSkipped"></div>
             <div class="btns">
-              <button class="btn btn-green" id="salesPushBtn" onclick="pushSales()">📤 Push to Sheet</button>
-              <button class="btn btn-ghost" onclick="copySalesTSV()">📋 Copy TSV</button>
+              <button class="btn btn-green" onclick="copySalesTSV()">📋 Copy for Sheets</button>
+              <button class="btn btn-ghost" onclick="clearSales()">Clear</button>
             </div>
-            <div id="salesPushMsg"></div>
+            <div id="salesCopyMsg"></div>
           </div>
         </div>
 
@@ -337,14 +289,14 @@ details[open] summary::before{content:'▼ '}
         <div id="tipsResults" style="display:none">
           <div class="summary" id="tipsSummary"></div>
           <div class="card">
-            <div class="card-label gold">Review Tips &amp; Push</div>
+            <div class="clabel gold">Review Tips &amp; Copy</div>
             <div style="font-weight:700;font-size:14px;margin-bottom:12px">
               <span id="tipsBadge" style="background:rgba(255,200,80,.13);color:var(--gold);border-radius:5px;padding:2px 10px;font-family:'DM Mono',monospace;font-size:11px"></span>
             </div>
             <div class="tbl-wrap">
               <table>
                 <thead><tr>
-                  <th>Date</th><th>Username</th><th>Payment</th>
+                  <th>Date</th><th>Username</th><th>Form of Payment</th>
                   <th>Gross</th><th>Net</th><th>Commission</th><th>Notes</th>
                 </tr></thead>
                 <tbody id="tipsTbody"></tbody>
@@ -352,59 +304,30 @@ details[open] summary::before{content:'▼ '}
             </div>
             <div id="tipsSkipped"></div>
             <div class="btns">
-              <button class="btn btn-green" id="tipsPushBtn" onclick="pushTips()">📤 Push Tips to Sheet</button>
-              <button class="btn btn-ghost" onclick="copyTipsTSV()">📋 Copy TSV</button>
+              <button class="btn btn-gold" onclick="copyTipsTSV()">📋 Copy Tips for Sheets</button>
+              <button class="btn btn-ghost" onclick="clearTips()">Clear</button>
             </div>
-            <div id="tipsPushMsg"></div>
+            <div id="tipsCopyMsg"></div>
           </div>
         </div>
       </div>
 
-      <!-- ── My Pages ── -->
+      <!-- My Pages -->
       <div id="page-pages" class="page">
         <div class="page-title">My Pages</div>
-        <div class="page-sub">Creator names used as section identifiers</div>
+        <div class="page-sub">Creator names used in the NOTES column</div>
         <div class="card">
-          <div class="card-label">Add Page</div>
+          <div class="clabel">Add Page</div>
           <div style="display:flex;gap:10px">
-            <input id="newPageName" type="text" placeholder="e.g. heather free" style="flex:1" onkeydown="if(event.key==='Enter')addPage()" />
+            <input id="newPageName" type="text" placeholder="e.g. heather free" style="flex:1"
+                   onkeydown="if(event.key==='Enter')addPage()" />
             <button class="btn btn-primary" onclick="addPage()">+ Add</button>
           </div>
           <div id="addPageMsg"></div>
         </div>
         <div class="card">
-          <div class="card-label">Pages <span id="pagesCount" class="tag" style="margin-left:6px"></span></div>
+          <div class="clabel">Pages <span id="pagesCount" class="tag" style="margin-left:6px"></span></div>
           <div id="pageList" class="page-list"></div>
-        </div>
-      </div>
-
-      <!-- ── Sheet Setup ── -->
-      <div id="page-settings" class="page">
-        <div class="page-title">Sheet Setup</div>
-        <div class="page-sub">Select your Google Spreadsheet &amp; tab</div>
-
-        <div class="card">
-          <div class="card-label">Your Spreadsheets</div>
-          <button class="btn btn-ghost" onclick="loadSpreadsheets()" style="margin-bottom:14px">🔄 Refresh list</button>
-          <div id="spreadsheetList" class="sheet-selector"></div>
-          <div id="ssMsg"></div>
-        </div>
-
-        <div id="tabSelector" class="card" style="display:none">
-          <div class="card-label">Select Tab</div>
-          <div id="tabList" class="tab-list"></div>
-          <div id="tabMsg"></div>
-        </div>
-
-        <div id="sheetStateCard" class="card" style="display:none">
-          <div class="card-label">Current Section State</div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:10px">
-            Shows how sections are currently allocated in this tab.
-          </div>
-          <div id="sectionGrid" class="section-grid"></div>
-          <div class="btns">
-            <button class="btn btn-ghost" onclick="loadSheetState()">🔄 Refresh</button>
-          </div>
         </div>
       </div>
 
@@ -413,50 +336,40 @@ details[open] summary::before{content:'▼ '}
 </div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────────────────────
 var STATE = {
-  user:            null,
-  pages:           [],
-  spreadsheetId:   localStorage.getItem('ss_id')   || null,
-  spreadsheetName: localStorage.getItem('ss_name') || null,
-  tabTitle:        localStorage.getItem('ss_tab')  || null,
-  tabId: localStorage.getItem('ss_gid') ? parseInt(localStorage.getItem('ss_gid'), 10) || null : null,
-  mode:            'sales',
-  salesRows:       [],
-  tipsRows:        [],
+  user:      null,
+  pages:     [],
+  mode:      'sales',
+  salesRows: [],
+  tipsRows:  [],
 };
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
-  // Check URL for error
   var params = new URLSearchParams(window.location.search);
   if (params.get('error')) {
+    document.getElementById('loginScreen').style.display = 'flex';
     showMsg('loginError', 'err', 'Login failed: ' + (params.get('detail') || params.get('error')));
+    return;
   }
-
   try {
-    var me = await api('/auth/me/');
-    STATE.user = me;
+    STATE.user = await api('/auth/me/');
     showApp();
     await loadPages();
-    updateSheetInfo();
   } catch(e) {
-    // Not authenticated — show login
     document.getElementById('loginScreen').style.display = 'flex';
   }
 }
 
 function showApp() {
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appShell').style.display = 'block';
-
-  var u = STATE.user;
+  document.getElementById('appShell').style.display    = 'block';
+  var u  = STATE.user;
   document.getElementById('sidebarName').textContent  = u.name;
   document.getElementById('sidebarEmail').textContent = u.email;
-
   var av = document.getElementById('sidebarAvatar');
   if (u.avatar_url) {
-    av.innerHTML = '<img src="'+u.avatar_url+'" alt="">';
+    av.innerHTML = '<img src="' + u.avatar_url + '" alt="">';
   } else {
     av.textContent = u.name[0].toUpperCase();
   }
@@ -468,19 +381,24 @@ function nav(pageId, btn) {
   document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('page-' + pageId).classList.add('active');
   if (btn) btn.classList.add('active');
-
-  if (pageId === 'tracker') updateSheetInfo();
-  if (pageId === 'pages')   renderPages();
-  if (pageId === 'settings') loadSpreadsheets();
+  if (pageId === 'pages') renderPages();
 }
 
-// ── API helper ────────────────────────────────────────────────────────────────
+// ── API ───────────────────────────────────────────────────────────────────────
 async function api(path, opts) {
-  var defaults = { headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() }, credentials: 'same-origin' };
-  var merged   = Object.assign({}, defaults, opts || {});
-  if (merged.body && typeof merged.body !== 'string') merged.body = JSON.stringify(merged.body);
-  var res = await fetch(path, merged);
-  if (res.status === 401) { window.location.href = '/'; throw new Error('Unauthenticated'); }
+  var defaults = {
+    headers:     { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    credentials: 'same-origin',
+  };
+  var merged = Object.assign({}, defaults, opts || {});
+  if (merged.body && typeof merged.body !== 'string') {
+    merged.body = JSON.stringify(merged.body);
+  }
+  var res  = await fetch(path, merged);
+  if (res.status === 401) {
+    window.location.href = '/';
+    throw new Error('Unauthenticated');
+  }
   var data = await res.json();
   if (!res.ok) throw new Error(data.error || JSON.stringify(data));
   return data;
@@ -491,13 +409,16 @@ function getCsrf() {
   return m ? m[1] : '';
 }
 
-// ── Sign out ──────────────────────────────────────────────────────────────────
 async function signOut() {
-  await fetch('/auth/logout/', { method:'POST', headers:{'X-CSRFToken':getCsrf()}, credentials:'same-origin' });
+  await fetch('/auth/logout/', {
+    method:      'POST',
+    headers:     { 'X-CSRFToken': getCsrf() },
+    credentials: 'same-origin',
+  });
   window.location.href = '/';
 }
 
-// ── Pages management ──────────────────────────────────────────────────────────
+// ── Pages ─────────────────────────────────────────────────────────────────────
 async function loadPages() {
   STATE.pages = await api('/auth/pages/');
   renderPages();
@@ -508,25 +429,25 @@ function renderPages() {
   var list = document.getElementById('pageList');
   document.getElementById('pagesCount').textContent = STATE.pages.length;
   if (!STATE.pages.length) {
-    list.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted);padding:12px 0">No pages yet. Add your first one above.</div>';
+    list.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted);padding:12px 0">No pages yet.</div>';
     return;
   }
   list.innerHTML = STATE.pages.map(function(p) {
     return '<div class="page-item">' +
       '<span class="page-item-name">' + esc(p.name) + '</span>' +
-      '<div class="page-item-actions">' +
-        '<button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deletePage('+p.id+')">Remove</button>' +
-      '</div>' +
-    '</div>';
+      '<button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deletePage(' + p.id + ')">Remove</button>' +
+      '</div>';
   }).join('');
 }
 
 function populatePageSelects() {
-  ['salesPage','tipsPage'].forEach(function(id) {
+  ['salesPage', 'tipsPage'].forEach(function(id) {
     var sel = document.getElementById(id);
     var cur = sel.value;
     sel.innerHTML = '<option value="">— select page —</option>' +
-      STATE.pages.map(function(p){ return '<option value="'+esc(p.name)+'"'+( p.name===cur?' selected':'')+'>'+esc(p.name)+'</option>'; }).join('');
+      STATE.pages.map(function(p) {
+        return '<option value="' + esc(p.name) + '"' + (p.name === cur ? ' selected' : '') + '>' + esc(p.name) + '</option>';
+      }).join('');
   });
 }
 
@@ -534,172 +455,104 @@ async function addPage() {
   var name = document.getElementById('newPageName').value.trim();
   if (!name) return;
   try {
-    var page = await api('/auth/pages/', { method:'POST', body:{name:name} });
+    var page = await api('/auth/pages/', { method: 'POST', body: { name: name } });
     STATE.pages.push(page);
-    STATE.pages.sort(function(a,b){ return a.name.localeCompare(b.name); });
+    STATE.pages.sort(function(a, b){ return a.name.localeCompare(b.name); });
     document.getElementById('newPageName').value = '';
     renderPages();
     populatePageSelects();
-    showMsg('addPageMsg','ok','✓ Page "' + esc(name) + '" added.');
+    showMsg('addPageMsg', 'ok', '✓ Page "' + esc(name) + '" added.');
   } catch(e) {
-    showMsg('addPageMsg','err', e.message);
+    showMsg('addPageMsg', 'err', e.message);
   }
 }
 
 async function deletePage(id) {
-  await api('/auth/pages/' + id + '/', { method:'DELETE' });
+  await api('/auth/pages/' + id + '/', { method: 'DELETE' });
   STATE.pages = STATE.pages.filter(function(p){ return p.id !== id; });
   renderPages();
   populatePageSelects();
 }
 
-// ── Sheet setup ───────────────────────────────────────────────────────────────
-async function loadSpreadsheets() {
-  var list = document.getElementById('spreadsheetList');
-  list.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted)">Loading...</div>';
-  try {
-    var files = await api('/api/sheets/spreadsheets/');
-    if (!files.length) {
-      list.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted)">No spreadsheets found in your Drive.</div>';
-      return;
-    }
-    list.innerHTML = files.map(function(f) {
-      var sel = f.id === STATE.spreadsheetId ? ' selected' : '';
-      return '<div class="sheet-file'+sel+'" onclick="selectSpreadsheet(\''+f.id+'\',\''+esc(f.name)+'\')">' +
-        '<div><div class="sheet-file-name">'+esc(f.name)+'</div><div class="sheet-file-id">'+f.id+'</div></div>' +
-        '<span style="color:var(--accent);font-size:18px">'+( sel ? '✓' : '›')+'</span>' +
-      '</div>';
-    }).join('');
-  } catch(e) {
-    showMsg('ssMsg','err',e.message);
-  }
-}
-
-async function selectSpreadsheet(id, name) {
-  STATE.spreadsheetId   = id;
-  STATE.spreadsheetName = name;
-  STATE.tabTitle = null; STATE.tabId = null;
-  localStorage.setItem('ss_id',   id);
-  localStorage.setItem('ss_name', name);
-  localStorage.removeItem('ss_tab');
-  localStorage.removeItem('ss_gid');
-
-  // Highlight selection
-  document.querySelectorAll('.sheet-file').forEach(function(el){ el.classList.remove('selected'); });
-  event.currentTarget.classList.add('selected');
-
-  // Load tabs
-  document.getElementById('tabSelector').style.display = 'block';
-  document.getElementById('sheetStateCard').style.display = 'none';
-  var tabList = document.getElementById('tabList');
-  tabList.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted)">Loading tabs...</span>';
-
-  try {
-    var tabs = await api('/api/sheets/spreadsheets/' + id + '/tabs/');
-    tabList.innerHTML = tabs.map(function(t) {
-      return '<button class="tab-btn" onclick="selectTab(\''+esc(t.title)+'\','+t.id+',this)">'+esc(t.title)+'</button>';
-    }).join('');
-  } catch(e) {
-    showMsg('tabMsg','err',e.message);
-  }
-}
-
-async function selectTab(title, gid, btn) {
-  STATE.tabTitle = title;
-  STATE.tabId    = gid;
-  localStorage.setItem('ss_tab', title);
-  localStorage.setItem('ss_gid', String(gid));
-
-  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-
-  document.getElementById('sheetStateCard').style.display = 'block';
-  updateSheetInfo();
-  await loadSheetState();
-}
-
-async function loadSheetState() {
-  if (!STATE.spreadsheetId || !STATE.tabTitle) return;
-  var grid = document.getElementById('sectionGrid');
-  grid.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted)">Loading...</div>';
-  try {
-    var sections = await api('/api/sheets/spreadsheets/'+STATE.spreadsheetId+'/state/?tab='+encodeURIComponent(STATE.tabTitle));
-    var filled   = sections.filter(function(s){ return s.page_name || s.has_headers; });
-    if (!filled.length) {
-      grid.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted)">Sheet appears empty — sections will be created when you push data.</div>';
-      return;
-    }
-    grid.innerHTML = filled.map(function(s) {
-      return '<div class="section-card'+(s.page_name?' has-page':'')+'">' +
-        '<div class="section-num">Section '+(s.section_index+1)+'</div>' +
-        '<div class="section-name">'+(s.page_name ? esc(s.page_name) : '<span style="color:var(--muted)">Empty</span>')+'</div>' +
-        '<div class="section-rows">'+(s.data_rows ? s.data_rows+' row(s)' : 'No data')+'</div>' +
-      '</div>';
-    }).join('');
-  } catch(e) {
-    grid.innerHTML = '<div class="alert a-err">'+e.message+'</div>';
-  }
-}
-
-function updateSheetInfo() {
-  var noWarn   = document.getElementById('noSheetWarning');
-  var infoCard = document.getElementById('selectedSheetInfo');
-  if (STATE.spreadsheetId && STATE.tabTitle) {
-    noWarn.style.display   = 'none';
-    infoCard.style.display = 'block';
-    document.getElementById('infoSheetName').textContent = STATE.spreadsheetName || STATE.spreadsheetId;
-    document.getElementById('infoTabName').textContent   = 'Tab: ' + STATE.tabTitle;
-  } else {
-    noWarn.style.display   = 'block';
-    infoCard.style.display = 'none';
-  }
-}
-
-// ── Mode toggle ───────────────────────────────────────────────────────────────
+// ── Mode ──────────────────────────────────────────────────────────────────────
 function setMode(mode) {
   STATE.mode = mode;
-  document.getElementById('modeSales').className = 'mode-btn' + (mode==='sales'?' active-sales':'');
-  document.getElementById('modeTips').className  = 'mode-btn' + (mode==='tips' ?' active-tips' :'');
-  document.getElementById('salesForm').style.display   = mode==='sales'?'':'none';
-  document.getElementById('tipsForm').style.display    = mode==='tips' ?'':'none';
+  document.getElementById('modeSales').className = 'mode-btn' + (mode === 'sales' ? ' active-sales' : '');
+  document.getElementById('modeTips').className  = 'mode-btn' + (mode === 'tips'  ? ' active-tips'  : '');
+  document.getElementById('salesForm').style.display    = mode === 'sales' ? '' : 'none';
+  document.getElementById('tipsForm').style.display     = mode === 'tips'  ? '' : 'none';
   document.getElementById('salesResults').style.display = 'none';
   document.getElementById('tipsResults').style.display  = 'none';
 }
 
-// ── Parsing helpers ───────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function pad(n){ return String(n).padStart(2, '0'); }
+function esc(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function dateStrToInt(s){ var p = s.split('/'); return p.length !== 3 ? null : parseInt(p[2] + p[1] + p[0], 10); }
+function inputDateToInt(v){ return v ? parseInt(v.replace(/-/g, ''), 10) : null; }
+function formatInputDate(v){ if (!v) return ''; var p = v.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+
 function parseSalesCode() {
   var raw = document.getElementById('salesCode').value.trim();
   if (!raw) return null;
-  var d = raw.replace(/^\./,'');
+  var d = raw.replace(/^\./, '');
   return /^\d+$/.test(d) ? d : null;
 }
+
 function onCodeInput() {
   var code = parseSalesCode();
   var el   = document.getElementById('codeParsed');
-  el.innerHTML = code ? '<span class="code-pill">Matching: .'+code+'</span>' : (document.getElementById('salesCode').value.trim() ? '<div class="alert a-err" style="margin-top:5px">Digits only, e.g. 18</div>' : '');
+  if (code) {
+    el.innerHTML = '<span class="code-pill">Matching: .' + code + '</span>';
+  } else if (document.getElementById('salesCode').value.trim()) {
+    el.innerHTML = '<div class="alert a-err" style="margin-top:5px">Digits only, e.g. 18</div>';
+  } else {
+    el.innerHTML = '';
+  }
 }
-function pad(n){ return String(n).padStart(2,'0'); }
-function dateStrToInt(s){ var p=s.split('/'); return p.length!==3?null:parseInt(p[2]+p[1]+p[0],10); }
-function inputDateToInt(v){ return v?parseInt(v.replace(/-/g,''),10):null; }
-function formatInputDate(v){ if(!v)return''; var p=v.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
-function esc(s){ var d=document.createElement('div');d.textContent=s;return d.innerHTML; }
 
 function findUsername(lines, idx) {
-  for (var j=idx-1;j>=Math.max(0,idx-8);j--) {
-    if (/^@u\d+$/.test(lines[j])) {
-      var prev=lines[j-1];
-      if (prev&&!/^@u\d+$/.test(prev)&&!/OS\s*-/.test(prev)&&!/has purchased/.test(prev)) return prev;
+  // Scan backwards from the purchase line to find the @handle,
+  // then extract the display name above it.
+  for (var j = idx - 1; j >= Math.max(0, idx - 12); j--) {
+    var ln = lines[j];
+
+    // Match any @handle (both @u123456 and @realhandle)
+    if (/^@\S+$/.test(ln)) {
+      // Display name is the line directly above the @handle
+      // but we need to skip system lines that aren't real names
+      var sysRe = /^(Add to favorites|Recent|pending custom|broke|responded|has purchased|FansMetric|Online Fans)/i;
+
+      // Walk backwards from j-1 to find the first non-system, non-empty line
+      for (var k = j - 1; k >= Math.max(0, j - 5); k--) {
+        var candidate = lines[k].trim();
+        if (!candidate) continue;
+        if (sysRe.test(candidate)) continue;
+        // Skip single uppercase letters (the avatar initials like "G", "NK", "JS")
+        if (/^[A-Z]{1,3}$/.test(candidate)) continue;
+        // Skip lines that look like another @handle
+        if (/^@\S+$/.test(candidate)) continue;
+        // Skip lines that are just "responded to the notification" etc.
+        if (/responded to the notification/i.test(candidate)) continue;
+
+        return candidate;
+      }
+
+      // Fallback: return the handle itself
+      return ln;
     }
   }
   return 'Unknown';
 }
+
 function findDate(lines, idx) {
-  var mo={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
-  for (var j=idx+1;j<Math.min(lines.length,idx+6);j++) {
-    var m=lines[j].match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\.?\s+(\d{1,2}),\s+(\d{4})/);
-    if(m) return pad(m[2])+'/'+pad(mo[m[1]])+'/'+m[3];
+  var mo = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+  for (var j = idx + 1; j < Math.min(lines.length, idx + 6); j++) {
+    var m = lines[j].match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\.?\s+(\d{1,2}),\s+(\d{4})/);
+    if (m) return pad(m[2]) + '/' + pad(mo[m[1]]) + '/' + m[3];
   }
-  var t=new Date(); return pad(t.getDate())+'/'+pad(t.getMonth()+1)+'/'+t.getFullYear();
+  var t = new Date();
+  return pad(t.getDate()) + '/' + pad(t.getMonth() + 1) + '/' + t.getFullYear();
 }
 
 // ── Sales parse ───────────────────────────────────────────────────────────────
@@ -709,230 +562,274 @@ function doParse() {
   var code    = parseSalesCode();
   var fromVal = document.getElementById('dateFrom').value;
   var toVal   = document.getElementById('dateTo').value;
-  if (!raw)     { showMsg('parseMsg','err','Paste notification data first.'); return; }
-  if (!page)    { showMsg('parseMsg','err','Select a page first.'); return; }
-  if (!code)    { showMsg('parseMsg','err','Enter a valid sales code (e.g. 18).'); return; }
-  if (!fromVal) { showMsg('parseMsg','err','From date required.'); return; }
-  if (!toVal)   { showMsg('parseMsg','err','To date required.'); return; }
-  var fromInt=inputDateToInt(fromVal), toInt=inputDateToInt(toVal);
-  if (fromInt>toInt){ showMsg('parseMsg','err','From date cannot be after To date.'); return; }
 
-  STATE.salesRows=[];
-  var skipped=[], skippedDate=[];
-  var lines=raw.split('\n').map(function(l){return l.trim();}).filter(Boolean);
-  for (var i=0;i<lines.length;i++) {
-    var m=lines[i].match(/has purchased your message for \$([0-9]+\.[0-9]{2})!/);
-    if(!m) continue;
-    var amt=m[1], cents=amt.split('.')[1];
-    if(cents!==code){ skipped.push({amount:amt,user:findUsername(lines,i)}); continue; }
-    var gross=parseFloat(amt), net=Math.round(gross*.8*100)/100, comm=Math.round(gross*.2*100)/100;
-    var date=findDate(lines,i), di=dateStrToInt(date);
-    if(di<fromInt||di>toInt){ skippedDate.push({amount:amt,user:findUsername(lines,i),date:date}); continue; }
-    STATE.salesRows.push({date:date,username:findUsername(lines,i),payment:'Message purchase',gross:gross,net:net,commission:comm,notes:page});
+  if (!raw)     { showMsg('parseMsg', 'err', 'Paste notification data first.'); return; }
+  if (!page)    { showMsg('parseMsg', 'err', 'Select a page first.'); return; }
+  if (!code)    { showMsg('parseMsg', 'err', 'Enter a valid sales code (e.g. 18).'); return; }
+  if (!fromVal) { showMsg('parseMsg', 'err', 'From date is required.'); return; }
+  if (!toVal)   { showMsg('parseMsg', 'err', 'To date is required.'); return; }
+
+  var fromInt = inputDateToInt(fromVal);
+  var toInt   = inputDateToInt(toVal);
+  if (fromInt > toInt) { showMsg('parseMsg', 'err', 'From date cannot be after To date.'); return; }
+
+  STATE.salesRows = [];
+  var skipped     = [];
+  var skippedDate = [];
+  var lines       = raw.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+
+  for (var i = 0; i < lines.length; i++) {
+    var m = lines[i].match(/has purchased your message for \$([0-9]+\.[0-9]{2})!/);
+    if (!m) continue;
+    var amt   = m[1];
+    var cents = amt.split('.')[1];
+    if (cents !== code) { skipped.push({ amount: amt, user: findUsername(lines, i) }); continue; }
+    var gross = parseFloat(amt);
+    var net   = Math.round(gross * 0.8  * 100) / 100;
+    var comm  = Math.round(gross * 0.2  * 100) / 100;
+    var date  = findDate(lines, i);
+    var di    = dateStrToInt(date);
+    if (di < fromInt || di > toInt) {
+      skippedDate.push({ amount: amt, user: findUsername(lines, i), date: date });
+      continue;
+    }
+    STATE.salesRows.push({
+      date: date, username: findUsername(lines, i),
+      payment: 'Message purchase', gross: gross, net: net, commission: comm, notes: page,
+    });
   }
+
   if (!STATE.salesRows.length) {
-    showMsg('parseMsg','err','No .'+code+' purchases found'+(skippedDate.length?' within date range ('+skippedDate.length+' outside)':'')+(skipped.length?', '+skipped.length+' non-.'+code+' skipped':'')+'.'); return;
+    showMsg('parseMsg', 'err',
+      'No .' + code + ' purchases found' +
+      (skippedDate.length ? ' within date range (' + skippedDate.length + ' outside)' : '') +
+      (skipped.length ? ', ' + skipped.length + ' non-.' + code + ' skipped' : '') + '.'
+    );
+    return;
   }
-  renderSalesTable(skipped,skippedDate);
+
+  renderSalesTable(skipped, skippedDate);
   renderSalesSummary();
-  document.getElementById('salesBadge').textContent = STATE.salesRows.length+' rows';
-  document.getElementById('salesResults').style.display='block';
-  document.getElementById('salesResults').scrollIntoView({behavior:'smooth'});
-  showMsg('parseMsg','ok','✓ '+STATE.salesRows.length+' found.'+(skippedDate.length?' '+skippedDate.length+' outside range.':'')+(skipped.length?' '+skipped.length+' skipped.':''));
+  document.getElementById('salesBadge').textContent = STATE.salesRows.length + ' rows';
+  renderFilterBadge('salesFilterBadge', fromVal, toVal, skippedDate.length);
+  document.getElementById('salesResults').style.display = 'block';
+  document.getElementById('salesResults').scrollIntoView({ behavior: 'smooth' });
+  showMsg('parseMsg', 'ok',
+    '✓ ' + STATE.salesRows.length + ' found.' +
+    (skippedDate.length ? ' ' + skippedDate.length + ' outside range.' : '') +
+    (skipped.length ? ' ' + skipped.length + ' skipped.' : '')
+  );
 }
 
-function renderSalesTable(skipped,skippedDate) {
-  var html='';
-  for (var i=0;i<STATE.salesRows.length;i++) {
-    var r=STATE.salesRows[i];
-    html+='<tr><td>'+r.date+'</td><td class="cv">'+esc(r.username)+'</td><td>'+r.payment+'</td>'+
-      '<td class="cg">$'+r.gross.toFixed(2)+'</td><td>$'+r.net.toFixed(2)+'</td>'+
-      '<td class="cp">$'+r.commission.toFixed(2)+'</td><td><span class="tag">'+esc(r.notes)+'</span></td></tr>';
+function renderFilterBadge(elId, fromVal, toVal, n) {
+  var el  = document.getElementById(elId);
+  var lbl = '📅 ';
+  if (fromVal && toVal) lbl += formatInputDate(fromVal) + ' → ' + formatInputDate(toVal);
+  else if (fromVal)     lbl += 'From ' + formatInputDate(fromVal);
+  else                  lbl += 'Until ' + formatInputDate(toVal);
+  if (n) lbl += ' · ' + n + ' outside';
+  el.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:10px;background:rgba(185,103,255,.12);color:var(--accent);border:1px solid rgba(185,103,255,.25);border-radius:5px;padding:2px 9px">' + lbl + '</span>';
+}
+
+function renderSalesTable(skipped, skippedDate) {
+  document.getElementById('salesTbody').innerHTML = STATE.salesRows.map(function(r) {
+    return '<tr><td>' + r.date + '</td><td class="cv">' + esc(r.username) + '</td><td>' + r.payment + '</td>' +
+      '<td class="cg">$' + r.gross.toFixed(2) + '</td><td>$' + r.net.toFixed(2) + '</td>' +
+      '<td class="cp">$' + r.commission.toFixed(2) + '</td>' +
+      '<td><span class="tag">' + esc(r.notes) + '</span></td></tr>';
+  }).join('');
+
+  var sk = '';
+  if (skippedDate && skippedDate.length) {
+    sk += '<details><summary>' + skippedDate.length + ' outside date range</summary><div class="skip-list">';
+    skippedDate.forEach(function(s) {
+      sk += '<span class="skip-tag" style="background:rgba(255,200,80,.1);color:var(--gold)">$' + s.amount + '</span> ' + s.date + ' ' + esc(s.user) + '<br>';
+    });
+    sk += '</div></details>';
   }
-  document.getElementById('salesTbody').innerHTML=html;
-  var sk='';
-  if(skippedDate&&skippedDate.length){
-    sk+='<details><summary>'+skippedDate.length+' outside date range</summary><div class="skip-list">';
-    skippedDate.forEach(function(s){sk+='<span class="skip-tag" style="background:rgba(255,200,80,.1);color:var(--gold)">$'+s.amount+'</span> '+s.date+' '+esc(s.user)+'<br>';});
-    sk+='</div></details>';
+  if (skipped.length) {
+    sk += '<details style="margin-top:6px"><summary>' + skipped.length + ' non-.' + parseSalesCode() + ' skipped</summary><div class="skip-list">';
+    skipped.forEach(function(s) {
+      sk += '<span class="skip-tag">$' + s.amount + '</span> ' + esc(s.user) + '<br>';
+    });
+    sk += '</div></details>';
   }
-  if(skipped.length){
-    sk+='<details style="margin-top:6px"><summary>'+skipped.length+' non-.'+parseSalesCode()+' skipped</summary><div class="skip-list">';
-    skipped.forEach(function(s){sk+='<span class="skip-tag">$'+s.amount+'</span> '+esc(s.user)+'<br>';});
-    sk+='</div></details>';
-  }
-  document.getElementById('salesSkipped').innerHTML=sk;
+  document.getElementById('salesSkipped').innerHTML = sk;
 }
 
 function renderSalesSummary() {
-  var tg=0,tn=0,tc=0;
-  STATE.salesRows.forEach(function(r){tg+=r.gross;tn+=r.net;tc+=r.commission;});
-  document.getElementById('salesSummary').innerHTML=
-    '<div class="sc"><div class="big cg">$'+tn.toFixed(2)+'</div><div class="lbl">Total Net</div></div>'+
-    '<div class="sc"><div class="big">$'+tg.toFixed(2)+'</div><div class="lbl">Total Gross</div></div>'+
-    '<div class="sc"><div class="big cp">$'+tc.toFixed(2)+'</div><div class="lbl">Total Commission</div></div>';
+  var tg = 0, tn = 0, tc = 0;
+  STATE.salesRows.forEach(function(r){ tg += r.gross; tn += r.net; tc += r.commission; });
+  document.getElementById('salesSummary').innerHTML =
+    '<div class="sc"><div class="big cg">$' + tn.toFixed(2) + '</div><div class="lbl">Total Net</div></div>' +
+    '<div class="sc"><div class="big">$'    + tg.toFixed(2) + '</div><div class="lbl">Total Gross</div></div>' +
+    '<div class="sc"><div class="big cp">$' + tc.toFixed(2) + '</div><div class="lbl">Total Commission</div></div>';
 }
 
 // ── Tips parse ────────────────────────────────────────────────────────────────
 function doParseTips() {
-  var raw=document.getElementById('rawTips').value.trim();
-  var page=document.getElementById('tipsPage').value;
-  var fromVal=document.getElementById('tipsDateFrom').value;
-  var toVal=document.getElementById('tipsDateTo').value;
-  if(!raw){showMsg('tipsParseMsg','err','Paste tip data first.');return;}
-  if(!page){showMsg('tipsParseMsg','err','Select a page first.');return;}
-  if(!fromVal){showMsg('tipsParseMsg','err','From date required.');return;}
-  if(!toVal){showMsg('tipsParseMsg','err','To date required.');return;}
-  var fromInt=inputDateToInt(fromVal),toInt=inputDateToInt(toVal);
-  if(fromInt>toInt){showMsg('tipsParseMsg','err','"From" cannot be after "To" date.');return;}
-  STATE.tipsRows=[];
-  var skippedDate=[];
-  var lines=raw.split('\n').map(function(l){return l.trim();}).filter(Boolean);
-  var mo={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
-  var sysRe=/^(Recent|Add to|favorites|responded|paid you|pending|PENDING|report|block|mute|hide)/i;
-  for (var i=0;i<lines.length;i++) {
-    var m=lines[i].match(/paid you a tip of \$([0-9]+\.[0-9]{2})/);
-    if(!m) continue;
-    var amount=parseFloat(m[1]),net=Math.round(amount*.8*100)/100,comm=Math.round(amount*.2*100)/100;
-    var tipper='Unknown';
-    for (var j=i-1;j>=Math.max(0,i-12);j--) {
-      var ln=lines[j];
-      if(/^@(?!u\d+)/.test(ln)){var ab=j>0?lines[j-1]:'';tipper=(ab&&!sysRe.test(ab))?ab:ln;break;}
-      if(/^@u\d+$/.test(ln)){var pv=j>0?lines[j-1]:'';tipper=(pv&&!sysRe.test(pv))?pv:ln;break;}
+  var raw     = document.getElementById('rawTips').value.trim();
+  var page    = document.getElementById('tipsPage').value;
+  var fromVal = document.getElementById('tipsDateFrom').value;
+  var toVal   = document.getElementById('tipsDateTo').value;
+
+  if (!raw)     { showMsg('tipsParseMsg', 'err', 'Paste tip data first.'); return; }
+  if (!page)    { showMsg('tipsParseMsg', 'err', 'Select a page first.'); return; }
+  if (!fromVal) { showMsg('tipsParseMsg', 'err', 'From date is required.'); return; }
+  if (!toVal)   { showMsg('tipsParseMsg', 'err', 'To date is required.'); return; }
+
+  var fromInt = inputDateToInt(fromVal);
+  var toInt   = inputDateToInt(toVal);
+  if (fromInt > toInt) { showMsg('tipsParseMsg', 'err', '"From" cannot be after "To" date.'); return; }
+
+  STATE.tipsRows  = [];
+  var skippedDate = [];
+  var lines       = raw.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  var mo          = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+  var sysRe       = /^(Recent|Add to|favorites|responded|paid you|pending|PENDING|report|block|mute|hide)/i;
+
+  for (var i = 0; i < lines.length; i++) {
+    var m = lines[i].match(/paid you a tip of \$([0-9]+\.[0-9]{2})/);
+    if (!m) continue;
+
+    var amount = parseFloat(m[1]);
+    var net    = Math.round(amount * 0.8 * 100) / 100;
+    var comm   = Math.round(amount * 0.2 * 100) / 100;
+    var tipper = 'Unknown';
+
+    for (var j = i - 1; j >= Math.max(0, i - 12); j--) {
+      var ln = lines[j];
+      if (/^@(?!u\d+)/.test(ln)) {
+        var ab = j > 0 ? lines[j - 1] : '';
+        tipper = (ab && !sysRe.test(ab)) ? ab : ln;
+        break;
+      }
+      if (/^@u\d+$/.test(ln)) {
+        var pv = j > 0 ? lines[j - 1] : '';
+        tipper = (pv && !sysRe.test(pv)) ? pv : ln;
+        break;
+      }
     }
-    var date='';
-    for (var k=i+1;k<Math.min(lines.length,i+6);k++){
-      var dm=lines[k].match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\.?\s+(\d{1,2}),\s+(\d{4})/);
-      if(dm){date=pad(dm[2])+'/'+pad(mo[dm[1]])+'/'+dm[3];break;}
+
+    var date = '';
+    for (var k = i + 1; k < Math.min(lines.length, i + 6); k++) {
+      var dm = lines[k].match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\.?\s+(\d{1,2}),\s+(\d{4})/);
+      if (dm) { date = pad(dm[2]) + '/' + pad(mo[dm[1]]) + '/' + dm[3]; break; }
     }
-    if(!date){var t=new Date();date=pad(t.getDate())+'/'+pad(t.getMonth()+1)+'/'+t.getFullYear();}
-    var di=dateStrToInt(date);
-    if(di<fromInt||di>toInt){skippedDate.push({amount:amount,tipper:tipper,date:date});continue;}
-    STATE.tipsRows.push({date:date,username:tipper,payment:'Paid a tip',gross:amount,net:net,commission:comm,notes:page});
+    if (!date) { var t = new Date(); date = pad(t.getDate()) + '/' + pad(t.getMonth() + 1) + '/' + t.getFullYear(); }
+
+    var di = dateStrToInt(date);
+    if (di < fromInt || di > toInt) { skippedDate.push({ amount: amount, tipper: tipper, date: date }); continue; }
+
+    STATE.tipsRows.push({
+      date: date, username: tipper,
+      payment: 'Paid a tip', gross: amount, net: net, commission: comm, notes: page,
+    });
   }
-  if(!STATE.tipsRows.length){showMsg('tipsParseMsg','err','No tips found'+(skippedDate.length?' within date range ('+skippedDate.length+' outside)':'')+'.'); return;}
+
+  if (!STATE.tipsRows.length) {
+    showMsg('tipsParseMsg', 'err',
+      'No tips found' + (skippedDate.length ? ' within date range (' + skippedDate.length + ' outside)' : '') + '.'
+    );
+    return;
+  }
+
   renderTipsTable(skippedDate);
   renderTipsSummary();
-  document.getElementById('tipsBadge').textContent=STATE.tipsRows.length+' tips';
-  document.getElementById('tipsResults').style.display='block';
-  document.getElementById('tipsResults').scrollIntoView({behavior:'smooth'});
-  showMsg('tipsParseMsg','ok','✓ '+STATE.tipsRows.length+' tip(s) parsed.'+(skippedDate.length?' '+skippedDate.length+' outside range.':''));
+  document.getElementById('tipsBadge').textContent = STATE.tipsRows.length + ' tips';
+  document.getElementById('tipsResults').style.display = 'block';
+  document.getElementById('tipsResults').scrollIntoView({ behavior: 'smooth' });
+  showMsg('tipsParseMsg', 'ok',
+    '✓ ' + STATE.tipsRows.length + ' tip(s) parsed.' +
+    (skippedDate.length ? ' ' + skippedDate.length + ' outside range.' : '')
+  );
 }
 
 function renderTipsTable(skippedDate) {
-  var html='';
-  STATE.tipsRows.forEach(function(r){
-    html+='<tr><td>'+r.date+'</td><td class="cw">'+esc(r.username)+'</td><td>'+r.payment+'</td>'+
-      '<td class="cg">$'+r.gross.toFixed(2)+'</td><td>$'+r.net.toFixed(2)+'</td>'+
-      '<td class="cp">$'+r.commission.toFixed(2)+'</td><td><span class="tag-gold">'+esc(r.notes)+'</span></td></tr>';
-  });
-  document.getElementById('tipsTbody').innerHTML=html;
-  var sk='';
-  if(skippedDate&&skippedDate.length){
-    sk='<details><summary>'+skippedDate.length+' outside date range</summary><div class="skip-list">';
-    skippedDate.forEach(function(s){sk+='<span class="skip-tag" style="background:rgba(255,200,80,.1);color:var(--gold)">$'+s.amount.toFixed(2)+'</span> '+s.date+' '+esc(s.tipper)+'<br>';});
-    sk+='</div></details>';
+  document.getElementById('tipsTbody').innerHTML = STATE.tipsRows.map(function(r) {
+    return '<tr><td>' + r.date + '</td><td class="cw">' + esc(r.username) + '</td><td>' + r.payment + '</td>' +
+      '<td class="cg">$' + r.gross.toFixed(2) + '</td><td>$' + r.net.toFixed(2) + '</td>' +
+      '<td class="cp">$' + r.commission.toFixed(2) + '</td>' +
+      '<td><span class="tag-gold">' + esc(r.notes) + '</span></td></tr>';
+  }).join('');
+
+  var sk = '';
+  if (skippedDate && skippedDate.length) {
+    sk = '<details><summary>' + skippedDate.length + ' outside date range</summary><div class="skip-list">';
+    skippedDate.forEach(function(s) {
+      sk += '<span class="skip-tag" style="background:rgba(255,200,80,.1);color:var(--gold)">$' + s.amount.toFixed(2) + '</span> ' + s.date + ' ' + esc(s.tipper) + '<br>';
+    });
+    sk += '</div></details>';
   }
-  document.getElementById('tipsSkipped').innerHTML=sk;
+  document.getElementById('tipsSkipped').innerHTML = sk;
 }
 
 function renderTipsSummary() {
-  var tg=0,tn=0,tc=0;
-  STATE.tipsRows.forEach(function(r){tg+=r.gross;tn+=r.net;tc+=r.commission;});
-  document.getElementById('tipsSummary').innerHTML=
-    '<div class="sc"><div class="big cw">$'+tg.toFixed(2)+'</div><div class="lbl">Total Gross</div></div>'+
-    '<div class="sc"><div class="big cg">$'+tn.toFixed(2)+'</div><div class="lbl">Total Net</div></div>'+
-    '<div class="sc"><div class="big cp">$'+tc.toFixed(2)+'</div><div class="lbl">Total Commission</div></div>';
-}
-
-async function push(rows, pageName, btnId, msgId) {
-  if (!STATE.spreadsheetId || !STATE.tabTitle) {
-    showMsg(msgId, 'err', 'No sheet selected. Go to Sheet Setup.');
-    return;
-  }
-  if (!STATE.tabId) {
-    showMsg(msgId, 'err', 'No tab selected. Go to Sheet Setup and click a tab.');
-    return;
-  }
-
-  var btn = document.getElementById(btnId);
-  btn.disabled  = true;
-  btn.innerHTML = '<span class="spin"></span> Pushing...';
-
-  var payload = {
-    sheet_id:    STATE.tabId,
-    sheet_title: STATE.tabTitle,
-    page_name:   pageName,
-    rows: rows.map(function(r) {
-      return {
-        date:       r.date,
-        username:   r.username,
-        payment:    r.payment,
-        gross:      r.gross.toFixed(2),
-        net:        r.net.toFixed(2),
-        commission: r.commission.toFixed(2),
-        notes:      r.notes,
-      };
-    })
-  };
-
-  try {
-    var result = await api(
-      '/api/sheets/spreadsheets/' + STATE.spreadsheetId + '/push/',
-      { method: 'POST', body: payload }
-    );
-    showMsg(msgId, 'ok',
-      '✓ ' + result.inserted + ' row(s) pushed to section ' +
-      (result.section_index + 1) + ' of "' + result.tab + '".'
-    );
-  } catch(e) {
-    showMsg(msgId, 'err', e.message);
-  }
-
-  btn.disabled  = false;
-  btn.innerHTML = btnId === 'salesPushBtn' ? '📤 Push to Sheet' : '📤 Push Tips to Sheet';
-}
-
-function pushSales() {
-  var page = STATE.salesRows.length ? STATE.salesRows[0].notes : document.getElementById('salesPage').value;
-  push(STATE.salesRows, page, 'salesPushBtn', 'salesPushMsg');
-}
-function pushTips() {
-  var page = STATE.tipsRows.length ? STATE.tipsRows[0].notes : document.getElementById('tipsPage').value;
-  push(STATE.tipsRows, page, 'tipsPushBtn', 'tipsPushMsg');
+  var tg = 0, tn = 0, tc = 0;
+  STATE.tipsRows.forEach(function(r){ tg += r.gross; tn += r.net; tc += r.commission; });
+  document.getElementById('tipsSummary').innerHTML =
+    '<div class="sc"><div class="big cw">$' + tg.toFixed(2) + '</div><div class="lbl">Total Gross</div></div>' +
+    '<div class="sc"><div class="big cg">$' + tn.toFixed(2) + '</div><div class="lbl">Total Net</div></div>' +
+    '<div class="sc"><div class="big cp">$' + tc.toFixed(2) + '</div><div class="lbl">Total Commission</div></div>';
 }
 
 // ── Copy TSV ──────────────────────────────────────────────────────────────────
-function copyTSV(rows, msgId) {
-  var hdr=['DATE','USERNAME','FORM OF PAYMENT','GROSS','NET','COMMISSION 20%','NOTES'].join('\t');
-  var body=rows.map(function(r){ return [r.date,r.username,r.payment,r.gross.toFixed(2),r.net.toFixed(2),r.commission.toFixed(2),r.notes].join('\t'); });
-  navigator.clipboard.writeText([hdr].concat(body).join('\n')).then(function(){ showMsg(msgId,'ok','✓ Copied! Paste into Google Sheets with Ctrl+V.'); });
+function buildTSV(rows) {
+  return rows.map(function(r) {
+    return [
+      r.date,
+      r.username,
+      r.payment,
+      r.gross.toFixed(2),
+      r.net.toFixed(2),
+      r.commission.toFixed(2),
+      r.notes,
+    ].join('\t');
+  }).join('\n');
 }
-function copySalesTSV(){ copyTSV(STATE.salesRows,'salesPushMsg'); }
-function copyTipsTSV() { copyTSV(STATE.tipsRows, 'tipsPushMsg'); }
+
+function copySalesTSV() {
+  if (!STATE.salesRows.length) return;
+  navigator.clipboard.writeText(buildTSV(STATE.salesRows)).then(function() {
+    showMsg('salesCopyMsg', 'ok', '✓ Copied ' + STATE.salesRows.length + ' row(s). Open your sheet and paste with Ctrl+V.');
+  }).catch(function() {
+    showMsg('salesCopyMsg', 'err', 'Copy failed — try a different browser.');
+  });
+}
+
+function copyTipsTSV() {
+  if (!STATE.tipsRows.length) return;
+  navigator.clipboard.writeText(buildTSV(STATE.tipsRows)).then(function() {
+    showMsg('tipsCopyMsg', 'ok', '✓ Copied ' + STATE.tipsRows.length + ' tip(s). Open your sheet and paste with Ctrl+V.');
+  }).catch(function() {
+    showMsg('tipsCopyMsg', 'err', 'Copy failed — try a different browser.');
+  });
+}
 
 // ── Clear ─────────────────────────────────────────────────────────────────────
-function clearSales(){
-  document.getElementById('rawSales').value='';
-  document.getElementById('parseMsg').innerHTML='';
-  document.getElementById('salesResults').style.display='none';
-  STATE.salesRows=[];
+function clearSales() {
+  document.getElementById('rawSales').value              = '';
+  document.getElementById('parseMsg').innerHTML          = '';
+  document.getElementById('salesCopyMsg').innerHTML      = '';
+  document.getElementById('salesResults').style.display  = 'none';
+  STATE.salesRows = [];
 }
-function clearTips(){
-  document.getElementById('rawTips').value='';
-  document.getElementById('tipsParseMsg').innerHTML='';
-  document.getElementById('tipsResults').style.display='none';
-  STATE.tipsRows=[];
+
+function clearTips() {
+  document.getElementById('rawTips').value               = '';
+  document.getElementById('tipsParseMsg').innerHTML      = '';
+  document.getElementById('tipsCopyMsg').innerHTML       = '';
+  document.getElementById('tipsResults').style.display   = 'none';
+  STATE.tipsRows = [];
 }
 
 // ── Alerts ────────────────────────────────────────────────────────────────────
-function showMsg(id,type,text){
-  var cls={ok:'a-ok',err:'a-err',inf:'a-inf',warn:'a-warn'};
-  var el=document.getElementById(id);
-  if(el) el.innerHTML='<div class="alert '+cls[type]+'">'+text+'</div>';
+function showMsg(id, type, text) {
+  var cls = { ok: 'a-ok', err: 'a-err', inf: 'a-inf', warn: 'a-warn' };
+  var el  = document.getElementById(id);
+  if (el) el.innerHTML = '<div class="alert ' + cls[type] + '">' + text + '</div>';
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
 init();
 </script>
 </body>

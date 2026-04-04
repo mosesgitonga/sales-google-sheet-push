@@ -21,7 +21,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'apps.accounts',
-    'apps.sheets',
 ]
 
 MIDDLEWARE = [
@@ -111,8 +110,6 @@ GOOGLE_SCOPES = [
     'openid',
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile',
-    'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/drive.readonly',
 ]
 
 REST_FRAMEWORK = {

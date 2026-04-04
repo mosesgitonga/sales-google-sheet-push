@@ -21,8 +21,6 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('apps.accounts.urls')),
-    path('api/sheets/', include('apps.sheets.urls')),
-    # Catch-all: serve the SPA
     path('', TemplateView.as_view(template_name='index.html'), name='index'),
     path('<path:path>', TemplateView.as_view(template_name='index.html'), name='spa'),
 ]
